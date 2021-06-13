@@ -10,6 +10,7 @@ export const ChatScreen = {
   `,
 
   MessageList: styled.div`
-    flex: 1;
+    height: calc(100% - 70px - 67px);
+    overflow-y: auto;
   `,
 };

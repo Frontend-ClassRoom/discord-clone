@@ -9,14 +9,18 @@ import {
 import { ChatNavigation } from './Styled';
 import ChatHeaderSearch from '../ChatHeaderSearch/index';
 
-const ChatHeader: FC = () => {
+interface Props {
+  channelName: string;
+}
+
+const ChatHeader: FC<Props> = ({ channelName }) => {
   return (
     <ChatNavigation.Panel>
       {/*  */}
       <ChatNavigation.LeftSection>
         <ChatNavigation.ChatTitle>
           <ChatNavigation.ChatHash>#</ChatNavigation.ChatHash>
-          Test Channel Name
+          {channelName}
         </ChatNavigation.ChatTitle>
       </ChatNavigation.LeftSection>
       {/*  */}
