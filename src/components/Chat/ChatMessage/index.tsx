@@ -1,19 +1,31 @@
 import React, { FC } from 'react';
 import { ChatMessageItem } from './Styled';
 import { Avatar } from '@material-ui/core';
+import { MessageTimestamp, TIME_STAMP_PADDING_MS } from 'types/Message';
+import { UserInfo } from 'types/User';
 
-const ChatMessage: FC = () => {
+interface Props {
+  message: string;
+  timestamp: MessageTimestamp;
+  user: UserInfo;
+}
+
+const ChatMessage: FC<Props> = ({ message, timestamp, user }) => {
+  const messageTimeStamp = new Date(
+    timestamp?.seconds * TIME_STAMP_PADDING_MS
+  ).toUTCString();
+
   return (
     <ChatMessageItem.Panel>
-      <Avatar />
+      <Avatar src={user.photo} />
       <ChatMessageItem.MessageInfo>
         <ChatMessageItem.UserName>
-          UserName
+          {user.userName}
           <ChatMessageItem.MessageTimestamp>
-            times
+            {messageTimeStamp}
           </ChatMessageItem.MessageTimestamp>
         </ChatMessageItem.UserName>
-        <ChatMessageItem.MessageBody>message</ChatMessageItem.MessageBody>
+        <ChatMessageItem.MessageBody>{message}</ChatMessageItem.MessageBody>
       </ChatMessageItem.MessageInfo>
     </ChatMessageItem.Panel>
   );
