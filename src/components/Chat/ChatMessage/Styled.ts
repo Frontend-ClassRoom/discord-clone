@@ -12,15 +12,21 @@ export const ChatMessageItem = {
     margin-left: 20px;
   `,
 
-  UserName: styled.h4``,
+  UserName: styled.h4`
+    display: flex;
+    align-items: center;
+    color: rgba(255, 255, 255, 0.7);
+    cursor: default;
+  `,
 
   MessageTimestamp: styled.span`
     margin-left: 10px;
     color: gray;
     font-size: x-small;
+    cursor: default;
   `,
 
   MessageBody: styled.p`
-    margin-top: 5px;
+    margin-top: 10px;
   `,
 };
