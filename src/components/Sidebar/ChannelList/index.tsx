@@ -1,4 +1,4 @@
-import { FC, useState } from 'react';
+import { FC } from 'react';
 import { ChannelListItem } from './Styled';
 import { Delete, Edit } from '@material-ui/icons';
 
@@ -7,7 +7,7 @@ interface Props {
   channel: string;
   handleChangeChannel: (channelId: string, channelName: string) => void;
   handleDeleteChannel: (channelId: string) => void;
-  handleChangeNameChannel: (channelId: string) => void;
+  handleChangeNameChannel: (channelId: string, channelName: string) => void;
 }
 
 const ChannelList: FC<Props> = ({
@@ -17,18 +17,14 @@ const ChannelList: FC<Props> = ({
   handleDeleteChannel,
   handleChangeNameChannel,
 }) => {
-  const [hovered, setHovered] = useState<boolean>(false);
   return (
-    <ChannelListItem.Panel
-      onMouseEnter={() => setHovered(true)}
-      onMouseLeave={() => setHovered(false)}
-    >
+    <ChannelListItem.Panel>
       <ChannelListItem.Title onClick={() => handleChangeChannel(id, channel)}>
         <ChannelListItem.Hash>#</ChannelListItem.Hash>
         {channel}
       </ChannelListItem.Title>
-      <ChannelListItem.Icons hovered={hovered}>
-        <Edit onClick={() => handleChangeNameChannel(id)} />
+      <ChannelListItem.Icons className="channel-icons">
+        <Edit onClick={() => handleChangeNameChannel(id, channel)} />
         <Delete onClick={() => handleDeleteChannel(id)} />
       </ChannelListItem.Icons>
     </ChannelListItem.Panel>

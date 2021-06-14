@@ -1,4 +1,4 @@
-import React, { FC, useEffect, useState } from 'react';
+import { FC, useEffect, useState } from 'react';
 import AddIcon from '@material-ui/icons/Add';
 import { ExpandMore } from '@material-ui/icons';
 import { useDispatch, useSelector } from 'react-redux';
@@ -9,10 +9,11 @@ import ChannelList from './ChannelList';
 import Voice from './Voice';
 import Profile from './Profile';
 import { StyledSidebar, SidebarTop, SidebarChannel } from './Styled';
-import { setChannelInfo } from 'store/reducer/appSlice';
+import { setChannelInfo, selectChannelName } from 'store/reducer/appSlice';
 
 const Sidebar: FC = () => {
   const userState = useSelector(selectUser);
+  const channelNameState = useSelector(selectChannelName);
   const dispatch = useDispatch();
   const [channels, setChannels] = useState([]);
 
@@ -51,20 +52,30 @@ const Sidebar: FC = () => {
     db.collection('channels').doc(channelId).delete();
   };
 
-  const handleChangeNameChannel = (channelId: string) => {
-    const channelName = prompt('Enter a Update Channel Name');
+  const handleChangeNameChannel = (channelId: string, channelName: string) => {
+    const changeChannelName = prompt('Enter a Update Channel Name');
     if (channelName !== '' && channelName !== undefined) {
       db.collection('channels').doc(channelId).update({
-        channelName: channelName,
+        channelName: changeChannelName,
       });
+
+      // 수정할 채팅채널에 이미 들어가 있는 경우 Chat Header에 ChannelName도 같이 변경
+      if (channelName === channelNameState) {
+        dispatch(
+          setChannelInfo({
+            channelId: channelId,
+            channelName: changeChannelName,
+          })
+        );
+      }
     }
   };
 
-  const handleChangeChannel = (id: string, channelName: string) => {
-    if (!id || !channelName) return;
+  const handleChangeChannel = (channelId: string, channelName: string) => {
+    if (!channelId || !channelName) return;
     dispatch(
       setChannelInfo({
-        channelId: id,
+        channelId: channelId,
         channelName: channelName,
       })
     );

@@ -3,7 +3,7 @@ import { LoginPage } from './Styled';
 import { auth, provider } from '../../utils/firebase';
 
 const Login: FC = () => {
-  const SignIn = (e: any) => {
+  const SignIn = () => {
     //do google Login
     auth.signInWithPopup(provider).catch((error) => alert(error.message));
   };
