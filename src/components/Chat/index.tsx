@@ -10,24 +10,24 @@ import { ChatScreen } from './Styled';
 import { MessageType } from 'types/Message';
 
 const Chat: FC = () => {
-  const [message, setMessage] = useState<string>('');
-  const [channelMessage, setChannelMessage] = useState([]);
   const userState = useSelector(selectUser);
   const channelId = useSelector(selectChannelId);
   const channelName = useSelector(selectChannelName);
+  const [message, setMessage] = useState<string>('');
+  const [channelMessage, setChannelMessage] = useState([]);
+  const channelMessageDB = db
+    .collection('channels')
+    .doc(channelId)
+    .collection('messages');
 
   useEffect(() => {
     if (channelId) {
-      db.collection('channels')
-        .doc(channelId)
-        .collection('messages')
-        .orderBy('timestamp', 'asc')
-        .onSnapshot((snapshot) => {
-          const docs: any = snapshot.docs.map((doc) => doc.data());
-          if (docs) {
-            setChannelMessage(docs);
-          }
-        });
+      channelMessageDB.orderBy('timestamp', 'asc').onSnapshot((snapshot) => {
+        const docs: any = snapshot.docs.map((doc) => doc.data());
+        if (docs) {
+          setChannelMessage(docs);
+        }
+      });
     }
   }, [channelId]);
 
@@ -40,7 +40,7 @@ const Chat: FC = () => {
       seconds: new Date().getTime(),
     };
 
-    db.collection('channels').doc(channelId).collection('messages').add({
+    channelMessageDB.add({
       message: message,
       timestamp: timestamp,
       user: userState,
@@ -56,6 +56,7 @@ const Chat: FC = () => {
     [message]
   );
 
+  const updateMessage = useCallback(() => {}, []);
   const deleteMessage = useCallback(() => {}, []);
 
   return (
@@ -65,7 +66,12 @@ const Chat: FC = () => {
       {/*  */}
       <ChatScreen.MessageList>
         {channelMessage.map(({ message, timestamp, user }: MessageType) => (
-          <ChatMessage message={message} timestamp={timestamp} user={user} />
+          <ChatMessage
+            message={message}
+            timestamp={timestamp}
+            user={user}
+            currentUserId={userState}
+          />
         ))}
       </ChatScreen.MessageList>
       {/*  */}
