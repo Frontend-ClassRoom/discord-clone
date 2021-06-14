@@ -35,15 +35,15 @@ const Chat: FC = () => {
   const sendMessage = () => {
     if (!message) return;
 
-    const {
-      firestore: {
-        FieldValue: { serverTimestamp },
-      },
-    } = firebase;
+    const timestamp = {
+      // 기존 timestamp와 형식을 맞춰주기 위해 임시 추가
+      // 채널수정,삭제 채팅 수정삭제 기능 추가 후 변경
+      seconds: new Date().getTime(),
+    };
 
     db.collection('channels').doc(channelId).collection('messages').add({
       message: message,
-      timestamp: serverTimestamp(),
+      timestamp: timestamp,
       user: userState,
     });
 
