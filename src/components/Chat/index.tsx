@@ -56,6 +56,8 @@ const Chat: FC = () => {
     [message]
   );
 
+  const deleteMessage = useCallback(() => {}, []);
+
   return (
     <ChatScreen.Panel>
       {/*  */}

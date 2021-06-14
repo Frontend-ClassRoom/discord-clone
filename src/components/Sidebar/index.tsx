@@ -17,7 +17,8 @@ const Sidebar: FC = () => {
   const [channels, setChannels] = useState([]);
 
   useEffect(() => {
-    db.collection('channels').onSnapshot((snapshot) => {
+    const channel = db.collection('channels');
+    const getChannel = channel.onSnapshot((snapshot) => {
       if (!snapshot || !snapshot.docs) return;
       const docs: any = snapshot.docs.map((doc) => ({
         id: doc.id,
@@ -28,6 +29,8 @@ const Sidebar: FC = () => {
         setChannels(docs);
       }
     });
+
+    return () => getChannel();
   }, []);
 
   const SignOut = () => {
@@ -43,9 +46,22 @@ const Sidebar: FC = () => {
     }
   };
 
+  const handleDeleteChannel = (channelId: string) => {
+    if (!channelId) return;
+    db.collection('channels').doc(channelId).delete();
+  };
+
+  const handleChangeNameChannel = (channelId: string) => {
+    const channelName = prompt('Enter a Update Channel Name');
+    if (channelName !== '' && channelName !== undefined) {
+      db.collection('channels').doc(channelId).update({
+        channelName: channelName,
+      });
+    }
+  };
+
   const handleChangeChannel = (id: string, channelName: string) => {
     if (!id || !channelName) return;
-
     dispatch(
       setChannelInfo({
         channelId: id,
@@ -81,6 +97,8 @@ const Sidebar: FC = () => {
               id={id}
               channel={channel.channelName}
               handleChangeChannel={handleChangeChannel}
+              handleDeleteChannel={handleDeleteChannel}
+              handleChangeNameChannel={handleChangeNameChannel}
             />
           ))}
         </SidebarChannel.ChannelList>
