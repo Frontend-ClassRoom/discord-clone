@@ -11,8 +11,7 @@ interface Props {
 }
 
 const ChatMessage: FC<Props> = ({ message, timestamp, user }) => {
-  const messageTimeStamp = new Date(timestamp?.seconds).toUTCString();
-
+  const messageTime = new Date(timestamp.seconds).toLocaleTimeString();
   return (
     <ChatMessageItem.Panel>
       <Avatar src={user.photo} />
@@ -20,7 +19,7 @@ const ChatMessage: FC<Props> = ({ message, timestamp, user }) => {
         <ChatMessageItem.UserName>
           {user.userName}
           <ChatMessageItem.MessageTimestamp>
-            {messageTimeStamp}
+            {messageTime}
           </ChatMessageItem.MessageTimestamp>
         </ChatMessageItem.UserName>
         <ChatMessageItem.MessageBody>{message}</ChatMessageItem.MessageBody>

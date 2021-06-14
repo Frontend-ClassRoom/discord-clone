@@ -65,7 +65,12 @@ const Chat: FC = () => {
       {/*  */}
       <ChatScreen.MessageList>
         {channelMessage.map(({ message, timestamp, user }: MessageType) => (
-          <ChatMessage message={message} timestamp={timestamp} user={user} />
+          <ChatMessage
+            key={timestamp.seconds}
+            message={message}
+            timestamp={timestamp}
+            user={user}
+          />
         ))}
       </ChatScreen.MessageList>
       {/*  */}
