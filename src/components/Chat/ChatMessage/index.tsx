@@ -1,7 +1,7 @@
 import React, { FC } from 'react';
 import { ChatMessageItem } from './Styled';
 import { Avatar } from '@material-ui/core';
-import { MessageTimestamp, TIME_STAMP_PADDING_MS } from 'types/Message';
+import { MessageTimestamp } from 'types/Message';
 import { UserInfo } from 'types/User';
 
 interface Props {
@@ -11,9 +11,7 @@ interface Props {
 }
 
 const ChatMessage: FC<Props> = ({ message, timestamp, user }) => {
-  const messageTimeStamp = new Date(
-    timestamp?.seconds * TIME_STAMP_PADDING_MS
-  ).toUTCString();
+  const messageTimeStamp = new Date(timestamp?.seconds).toUTCString();
 
   return (
     <ChatMessageItem.Panel>
