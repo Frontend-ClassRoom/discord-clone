@@ -7,7 +7,6 @@ import ChatHeader from './ChatHeader';
 import ChatMessage from './ChatMessage';
 import ChatSendMessage from './ChatSendMessage';
 import { ChatScreen } from './Styled';
-import firebase from 'firebase';
 import { MessageType } from 'types/Message';
 
 const Chat: FC = () => {
