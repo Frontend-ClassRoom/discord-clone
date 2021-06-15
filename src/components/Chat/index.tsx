@@ -22,7 +22,7 @@ const Chat: FC = () => {
       db.collection('channels')
         .doc(channelId)
         .collection('messages')
-        .orderBy('timestamp', 'asc')
+        .orderBy('messageIndex', 'asc')
         .onSnapshot((snapshot) => {
           const docs: any = snapshot.docs.map((doc) =>
             Object.assign({}, doc.data(), {
@@ -49,15 +49,12 @@ const Chat: FC = () => {
     if (!message) return;
     if (!channelId) return;
 
-    const timestamp = {
-      // 기존 timestamp와 형식을 맞춰주기 위해 임시 추가
-      // 채널수정,삭제 채팅 수정삭제 기능 추가 후 변경
-      seconds: new Date().getTime(),
-    };
+    const messageIndex = channelMessage.length > 0 ? channelMessage.length : 0;
 
     const newMessage = {
       message,
-      timestamp,
+      messageIndex,
+      timestamp: new Date().getTime(),
       user: userState,
     };
 
@@ -70,6 +67,7 @@ const Chat: FC = () => {
           const combineResMessage = Object.assign({
             ...newMessage,
             messageId: res.id,
+            messageIndex: channelMessage.length,
           });
           setChannelMessage([...channelMessage, combineResMessage]);
           setMessage('');
@@ -117,7 +115,7 @@ const Chat: FC = () => {
         .update({
           message: updateMessage,
           modify: true,
-          timestamp: { seconds: new Date().getTime() },
+          timestamp: new Date().getTime(),
         });
     },
     [channelMessage]
@@ -125,9 +123,7 @@ const Chat: FC = () => {
 
   return (
     <ChatScreen.Panel>
-      {/*  */}
       <ChatHeader channelName={channelName} />
-      {/*  */}
       <ChatScreen.MessageList>
         {channelMessage.map(
           (
@@ -149,7 +145,6 @@ const Chat: FC = () => {
         )}
         <div ref={scrollRef} />
       </ChatScreen.MessageList>
-      {/*  */}
       <ChatSendMessage
         value={message}
         channelName={channelName}
@@ -157,7 +152,6 @@ const Chat: FC = () => {
         sendMessage={sendMessage}
         disabled={channelId ? false : true}
       />
-      {/*  */}
     </ChatScreen.Panel>
   );
 };

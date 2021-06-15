@@ -1,7 +1,6 @@
 import React, { FC } from 'react';
 import { ChatMessageItem } from './Styled';
 import { Avatar } from '@material-ui/core';
-import { MessageTimestamp } from 'types/Message';
 import { UserInfo } from 'types/User';
 import { Delete, Edit } from '@material-ui/icons';
 
@@ -9,7 +8,7 @@ interface Props {
   message: string;
   messageId: string;
   modify: boolean;
-  timestamp: MessageTimestamp;
+  timestamp: number;
   user: UserInfo;
   currentUserId: UserInfo;
   updateMessage: (messageId: string) => void;
@@ -26,7 +25,7 @@ const ChatMessage: FC<Props> = ({
   updateMessage,
   deleteMessage,
 }) => {
-  const messageTimeStamp = new Date(timestamp.seconds).toLocaleTimeString();
+  const messageTimeStamp = new Date(timestamp).toLocaleTimeString();
 
   return (
     <ChatMessageItem.Panel modify={user.uid === currentUserId.uid}>
