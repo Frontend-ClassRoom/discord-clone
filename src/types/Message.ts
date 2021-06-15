@@ -10,6 +10,7 @@ export interface MessageTimestamp {
 export interface MessageType {
   message: string;
   messageId: string;
+  messageIndex: number;
   timestamp: MessageTimestamp;
   user: UserInfo;
   modify?: boolean;

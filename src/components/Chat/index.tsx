@@ -22,7 +22,7 @@ const Chat: FC = () => {
       db.collection('channels')
         .doc(channelId)
         .collection('messages')
-        .orderBy('timestamp', 'asc')
+        .orderBy('messageIndex', 'asc')
         .onSnapshot((snapshot) => {
           const docs: any = snapshot.docs.map((doc) =>
             Object.assign({}, doc.data(), {
@@ -54,9 +54,11 @@ const Chat: FC = () => {
       // 채널수정,삭제 채팅 수정삭제 기능 추가 후 변경
       seconds: new Date().getTime(),
     };
+    const messageIndex = channelMessage.length > 0 ? channelMessage.length : 0;
 
     const newMessage = {
       message,
+      messageIndex,
       timestamp,
       user: userState,
     };
@@ -70,6 +72,7 @@ const Chat: FC = () => {
           const combineResMessage = Object.assign({
             ...newMessage,
             messageId: res.id,
+            messageIndex: channelMessage.length,
           });
           setChannelMessage([...channelMessage, combineResMessage]);
           setMessage('');
