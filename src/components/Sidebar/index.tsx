@@ -54,7 +54,7 @@ const Sidebar: FC = () => {
 
   const handleChangeNameChannel = (channelId: string, channelName: string) => {
     const changeChannelName = prompt('Enter a Update Channel Name');
-    if (channelName !== '' && channelName !== undefined) {
+    if (changeChannelName) {
       db.collection('channels').doc(channelId).update({
         channelName: changeChannelName,
       });
