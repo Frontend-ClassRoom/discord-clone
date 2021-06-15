@@ -25,12 +25,15 @@ export const ChatMessageItem = {
   UserName: styled.h4`
     display: flex;
     align-items: center;
+    color: rgba(255, 255, 255, 0.7);
+    cursor: default;
   `,
 
   MessageTimestamp: styled.span`
     margin-left: 10px;
     color: gray;
     font-size: x-small;
+    cursor: default;
   `,
 
   MessageModifyState: styled.em`
@@ -39,7 +42,7 @@ export const ChatMessageItem = {
   `,
 
   MessageBody: styled.p`
-    margin-top: 5px;
+    margin-top: 10px;
   `,
 
   Icons: styled.div<{ modify: boolean }>`
