@@ -26,7 +26,7 @@ const ChatMessage: FC<Props> = ({
   updateMessage,
   deleteMessage,
 }) => {
-  const messageTimeStamp = new Date(timestamp?.seconds).toUTCString();
+  const messageTimeStamp = new Date(timestamp.seconds).toLocaleTimeString();
 
   return (
     <ChatMessageItem.Panel modify={user.uid === currentUserId.uid}>
