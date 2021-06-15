@@ -10,12 +10,12 @@ import { ChatScreen } from './Styled';
 import { MessageType } from 'types/Message';
 
 const Chat: FC = () => {
-  const [message, setMessage] = useState<string>('');
-  const [channelMessage, setChannelMessage] = useState([]);
   const userState = useSelector(selectUser);
   const channelId = useSelector(selectChannelId);
   const channelName = useSelector(selectChannelName);
   const scrollRef = useRef<HTMLDivElement>(null);
+  const [message, setMessage] = useState<string>('');
+  const [channelMessage, setChannelMessage] = useState<MessageType[]>([]);
 
   useEffect(() => {
     if (channelId) {
@@ -24,7 +24,12 @@ const Chat: FC = () => {
         .collection('messages')
         .orderBy('timestamp', 'asc')
         .onSnapshot((snapshot) => {
-          const docs: any = snapshot.docs.map((doc) => doc.data());
+          const docs: any = snapshot.docs.map((doc) =>
+            Object.assign({}, doc.data(), {
+              modify: doc.data().modify ? doc.data().modify : false,
+              messageId: doc.id,
+            })
+          );
           if (docs) {
             setChannelMessage(docs);
           }
@@ -42,6 +47,7 @@ const Chat: FC = () => {
 
   const sendMessage = () => {
     if (!message) return;
+    if (!channelId) return;
 
     const timestamp = {
       // 기존 timestamp와 형식을 맞춰주기 위해 임시 추가
@@ -49,13 +55,26 @@ const Chat: FC = () => {
       seconds: new Date().getTime(),
     };
 
-    db.collection('channels').doc(channelId).collection('messages').add({
-      message: message,
-      timestamp: timestamp,
+    const newMessage = {
+      message,
+      timestamp,
       user: userState,
-    });
+    };
 
-    setMessage('');
+    db.collection('channels')
+      .doc(`${channelId}`)
+      .collection('messages')
+      .add(newMessage)
+      .then((res) => {
+        if (res && res.id) {
+          const combineResMessage = Object.assign({
+            ...newMessage,
+            messageId: res.id,
+          });
+          setChannelMessage([...channelMessage, combineResMessage]);
+          setMessage('');
+        }
+      });
   };
 
   const onChangeMessage = useCallback(
@@ -65,7 +84,44 @@ const Chat: FC = () => {
     [message]
   );
 
-  const deleteMessage = useCallback(() => {}, []);
+  const deleteMessage = useCallback(
+    (messageId: string) => {
+      if (!channelId) return;
+
+      db.collection('channels')
+        .doc(channelId)
+        .collection('messages')
+        .doc(messageId)
+        .delete()
+        .then(() => {
+          const filteredMessage = channelMessage?.filter(
+            (message) => message.messageId !== messageId
+          );
+
+          if (filteredMessage) {
+            setChannelMessage(filteredMessage);
+          }
+        });
+    },
+    [channelMessage]
+  );
+
+  const updateMessage = useCallback(
+    (messageId: string) => {
+      const updateMessage = prompt('Enter a new Channel name');
+      if (!updateMessage || !channelId) return;
+      db.collection('channels')
+        .doc(channelId)
+        .collection('messages')
+        .doc(messageId)
+        .update({
+          message: updateMessage,
+          modify: true,
+          timestamp: { seconds: new Date().getTime() },
+        });
+    },
+    [channelMessage]
+  );
 
   return (
     <ChatScreen.Panel>
@@ -73,14 +129,24 @@ const Chat: FC = () => {
       <ChatHeader channelName={channelName} />
       {/*  */}
       <ChatScreen.MessageList>
-        {channelMessage.map(({ message, timestamp, user }: MessageType) => (
-          <ChatMessage
-            key={timestamp.seconds}
-            message={message}
-            timestamp={timestamp}
-            user={user}
-          />
-        ))}
+        {channelMessage.map(
+          (
+            { message, timestamp, user, messageId, modify }: MessageType,
+            index: number
+          ) => (
+            <ChatMessage
+              key={index}
+              message={message}
+              messageId={messageId || ''}
+              timestamp={timestamp}
+              modify={modify || false}
+              currentUserId={userState}
+              user={user}
+              updateMessage={updateMessage}
+              deleteMessage={deleteMessage}
+            />
+          )
+        )}
         <div ref={scrollRef} />
       </ChatScreen.MessageList>
       {/*  */}
