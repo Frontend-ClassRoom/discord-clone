@@ -1,4 +1,4 @@
-import { FC, useCallback, useEffect, useState } from 'react';
+import { FC, useCallback, useEffect, useRef, useState } from 'react';
 import { useSelector } from 'react-redux';
 import { selectChannelId, selectChannelName } from 'store/reducer/appSlice';
 import { selectUser } from 'store/reducer/userSlice';
@@ -15,6 +15,7 @@ const Chat: FC = () => {
   const userState = useSelector(selectUser);
   const channelId = useSelector(selectChannelId);
   const channelName = useSelector(selectChannelName);
+  const scrollRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     if (channelId) {
@@ -30,6 +31,14 @@ const Chat: FC = () => {
         });
     }
   }, [channelId]);
+
+  const scrollMoveBottom = useCallback(() => {
+    scrollRef.current?.scrollIntoView({ behavior: 'smooth' });
+  }, [channelMessage]);
+
+  useEffect(() => {
+    scrollMoveBottom();
+  }, [channelMessage]);
 
   const sendMessage = () => {
     if (!message) return;
@@ -72,6 +81,7 @@ const Chat: FC = () => {
             user={user}
           />
         ))}
+        <div ref={scrollRef} />
       </ChatScreen.MessageList>
       {/*  */}
       <ChatSendMessage
