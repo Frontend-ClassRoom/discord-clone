@@ -11,7 +11,7 @@ import { MessageType } from 'types/Message';
 
 const Chat: FC = () => {
   const [message, setMessage] = useState<string>('');
-  const [channelMessage, setChannelMessage] = useState([]);
+  const [channelMessage, setChannelMessage] = useState<MessageType[]>([]);
   const userState = useSelector(selectUser);
   const channelId = useSelector(selectChannelId);
   const channelName = useSelector(selectChannelName);
@@ -25,6 +25,7 @@ const Chat: FC = () => {
         .orderBy('timestamp', 'asc')
         .onSnapshot((snapshot) => {
           const docs: any = snapshot.docs.map((doc) => doc.data());
+          console.log(docs);
           if (docs) {
             setChannelMessage(docs);
           }
