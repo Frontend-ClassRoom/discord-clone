@@ -33,6 +33,11 @@ export const ChatMessageItem = {
     font-size: x-small;
   `,
 
+  MessageModifyState: styled.em`
+    display: inline-block;
+    margin-left: 5px;
+  `,
+
   MessageBody: styled.p`
     margin-top: 5px;
   `,

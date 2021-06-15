@@ -1,4 +1,4 @@
-import { FC, useCallback, useEffect, useState } from 'react';
+import { FC, useCallback, useEffect, useRef, useState } from 'react';
 import { useSelector } from 'react-redux';
 import { selectChannelId, selectChannelName } from 'store/reducer/appSlice';
 import { selectUser } from 'store/reducer/userSlice';
@@ -13,26 +13,41 @@ const Chat: FC = () => {
   const userState = useSelector(selectUser);
   const channelId = useSelector(selectChannelId);
   const channelName = useSelector(selectChannelName);
+  const scrollRef = useRef<HTMLDivElement>(null);
   const [message, setMessage] = useState<string>('');
-  const [channelMessage, setChannelMessage] = useState([]);
-  const channelMessageDB = db
-    .collection('channels')
-    .doc(channelId)
-    .collection('messages');
+  const [channelMessage, setChannelMessage] = useState<MessageType[]>([]);
 
   useEffect(() => {
     if (channelId) {
-      channelMessageDB.orderBy('timestamp', 'asc').onSnapshot((snapshot) => {
-        const docs: any = snapshot.docs.map((doc) => doc.data());
-        if (docs) {
-          setChannelMessage(docs);
-        }
-      });
+      db.collection('channels')
+        .doc(channelId)
+        .collection('messages')
+        .orderBy('timestamp', 'asc')
+        .onSnapshot((snapshot) => {
+          const docs: any = snapshot.docs.map((doc) =>
+            Object.assign({}, doc.data(), {
+              modify: doc.data().modify ? doc.data().modify : false,
+              messageId: doc.id,
+            })
+          );
+          if (docs) {
+            setChannelMessage(docs);
+          }
+        });
     }
   }, [channelId]);
 
+  const scrollMoveBottom = useCallback(() => {
+    scrollRef.current?.scrollIntoView({ behavior: 'smooth' });
+  }, [channelMessage]);
+
+  useEffect(() => {
+    scrollMoveBottom();
+  }, [channelMessage]);
+
   const sendMessage = () => {
     if (!message) return;
+    if (!channelId) return;
 
     const timestamp = {
       // 기존 timestamp와 형식을 맞춰주기 위해 임시 추가
@@ -40,13 +55,26 @@ const Chat: FC = () => {
       seconds: new Date().getTime(),
     };
 
-    channelMessageDB.add({
-      message: message,
-      timestamp: timestamp,
+    const newMessage = {
+      message,
+      timestamp,
       user: userState,
-    });
+    };
 
-    setMessage('');
+    db.collection('channels')
+      .doc(`${channelId}`)
+      .collection('messages')
+      .add(newMessage)
+      .then((res) => {
+        if (res && res.id) {
+          const combineResMessage = Object.assign({
+            ...newMessage,
+            messageId: res.id,
+          });
+          setChannelMessage([...channelMessage, combineResMessage]);
+          setMessage('');
+        }
+      });
   };
 
   const onChangeMessage = useCallback(
@@ -56,8 +84,44 @@ const Chat: FC = () => {
     [message]
   );
 
-  const updateMessage = useCallback(() => {}, []);
-  const deleteMessage = useCallback(() => {}, []);
+  const deleteMessage = useCallback(
+    (messageId: string) => {
+      if (!channelId) return;
+
+      db.collection('channels')
+        .doc(channelId)
+        .collection('messages')
+        .doc(messageId)
+        .delete()
+        .then(() => {
+          const filteredMessage = channelMessage?.filter(
+            (message) => message.messageId !== messageId
+          );
+
+          if (filteredMessage) {
+            setChannelMessage(filteredMessage);
+          }
+        });
+    },
+    [channelMessage]
+  );
+
+  const updateMessage = useCallback(
+    (messageId: string) => {
+      const updateMessage = prompt('Enter a new Channel name');
+      if (!updateMessage || !channelId) return;
+      db.collection('channels')
+        .doc(channelId)
+        .collection('messages')
+        .doc(messageId)
+        .update({
+          message: updateMessage,
+          modify: true,
+          timestamp: { seconds: new Date().getTime() },
+        });
+    },
+    [channelMessage]
+  );
 
   return (
     <ChatScreen.Panel>
@@ -65,14 +129,25 @@ const Chat: FC = () => {
       <ChatHeader channelName={channelName} />
       {/*  */}
       <ChatScreen.MessageList>
-        {channelMessage.map(({ message, timestamp, user }: MessageType) => (
-          <ChatMessage
-            message={message}
-            timestamp={timestamp}
-            user={user}
-            currentUserId={userState}
-          />
-        ))}
+        {channelMessage.map(
+          (
+            { message, timestamp, user, messageId, modify }: MessageType,
+            index: number
+          ) => (
+            <ChatMessage
+              key={index}
+              message={message}
+              messageId={messageId || ''}
+              timestamp={timestamp}
+              modify={modify || false}
+              currentUserId={userState}
+              user={user}
+              updateMessage={updateMessage}
+              deleteMessage={deleteMessage}
+            />
+          )
+        )}
+        <div ref={scrollRef} />
       </ChatScreen.MessageList>
       {/*  */}
       <ChatSendMessage
